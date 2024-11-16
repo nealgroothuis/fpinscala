@@ -69,7 +69,9 @@ object List: // `List` companion object. Contains functions for creating and wor
   def drop[A](l: List[A], n: Int): List[A] =
     if n > 0 then drop(tail(l), n - 1) else l
 
-  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = ???
+  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match
+    case Nil        => Nil
+    case Cons(h, t) => if f(h) then dropWhile(t, f) else l
 
   def init[A](l: List[A]): List[A] = ???
 
