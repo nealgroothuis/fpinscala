@@ -95,7 +95,21 @@ object List: // `List` companion object. Contains functions for creating and wor
   def reverse[A](l: List[A]): List[A] =
     foldLeft(l, Nil, (t: List[A], h) => Cons(h, t))
 
-  def appendViaFoldRight[A](l: List[A], r: List[A]): List[A] = ???
+  def foldRightViaFoldLeft[A, B](l: List[A], acc: B, f: (A, B) => B): B =
+    foldLeft(reverse(l), acc, (b: B, a: A) => f(a, b))
+
+  def reverseViaFoldRight[A](l: List[A]): List[A] =
+    foldRight(
+      l,
+      Nil,
+      (a: A, as: List[A]) => appendViaFoldRight(as, Cons(a, Nil))
+    )
+
+  def appendViaFoldRight[A](l: List[A], r: List[A]): List[A] =
+    foldRight(l, r, Cons(_, _))
+
+  def foldLeftViaFoldRight[A, B](l: List[A], acc: B, f: (B, A) => B): B =
+    foldRight(reverseViaFoldRight(l), acc, (a: A, b: B) => f(b, a))
 
   def concat[A](l: List[List[A]]): List[A] = ???
 
