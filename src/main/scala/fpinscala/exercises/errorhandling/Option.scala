@@ -61,6 +61,13 @@ object Option:
       case (Some(a), Some(b)) => Some(f(a, b))
       case _                  => None
 
-  def sequence[A](as: List[Option[A]]): Option[List[A]] = ???
+  def sequence[A](as: List[Option[A]]): Option[List[A]] =
+    @annotation.tailrec
+    def loop(as: List[Option[A]], acc: List[A]): Option[List[A]] = as match
+      case Nil          => Some(acc)
+      case None :: t    => None
+      case Some(h) :: t => loop(t, h :: acc)
+
+    loop(as, Nil).map(_.reverse)
 
   def traverse[A, B](as: List[A])(f: A => Option[B]): Option[List[B]] = ???
