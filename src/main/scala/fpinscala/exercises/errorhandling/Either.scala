@@ -23,9 +23,17 @@ enum Either[+E, +A]:
 
 object Either:
   def traverse[E, A, B](es: List[A])(f: A => Either[E, B]): Either[E, List[B]] =
-    ???
+    @annotation.tailrec
+    def loop(bs: List[B], as: List[A]): Either[E, List[B]] = as match
+      case Nil => Right(bs)
+      case h :: t =>
+        f(h) match
+          case Right(b) => loop(b :: bs, t)
+          case Left(e)  => Left(e)
+    loop(Nil, es).map(_.reverse)
 
-  def sequence[E, A](es: List[Either[E, A]]): Either[E, List[A]] = ???
+  def sequence[E, A](es: List[Either[E, A]]): Either[E, List[A]] =
+    traverse(es)(identity)
 
   def mean(xs: IndexedSeq[Double]): Either[String, Double] =
     if xs.isEmpty then Left("mean of empty list!")
