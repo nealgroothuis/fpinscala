@@ -51,13 +51,20 @@ object Either:
       a: Either[List[E], A],
       b: Either[List[E], B],
       f: (A, B) => C
-  ): Either[List[E], C] = ???
+  ): Either[List[E], C] = (a, b) match
+    case (Left(aes), Right(_))  => Left(aes)
+    case (Right(_), Left(bes))  => Left(bes)
+    case (Left(aes), Left(bes)) => Left(aes ++ bes)
+    case (Right(a), Right(b))   => Right(f(a, b))
 
   def traverseAll[E, A, B](
       as: List[A],
       f: A => Either[List[E], B]
-  ): Either[List[E], List[B]] = ???
+  ): Either[List[E], List[B]] =
+    as.foldRight(Right(Nil): Either[List[E], List[B]])((a, b) =>
+      map2All(f(a), b, _ :: _)
+    )
 
   def sequenceAll[E, A](
       as: List[Either[List[E], A]]
-  ): Either[List[E], List[A]] = ???
+  ): Either[List[E], List[A]] = traverseAll(as, identity)
