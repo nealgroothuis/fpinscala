@@ -85,7 +85,10 @@ object LazyList:
 
   def from(n: Int): LazyList[Int] = LazyList.cons(n, LazyList.from(n + 1))
 
-  lazy val fibs: LazyList[Int] = ???
+  lazy val fibs: LazyList[Int] =
+    def loop(a: Int, b: Int): LazyList[Int] =
+      LazyList.cons(a, loop(b, a + b))
+    loop(0, 1)
 
   def unfold[A, S](state: S)(f: S => Option[(A, S)]): LazyList[A] = ???
 
