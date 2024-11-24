@@ -114,6 +114,11 @@ enum LazyList[+A]:
       case Cons(h, t) => Option(s, t())
   )
 
+  def scanRight[B](z: => B)(f: (A, => B) => B): LazyList[B] =
+    foldRight[Cons[B]](LazyList.Cons(() => z, () => LazyList.empty[B]))(
+      (a, bs) => Cons(() => f(a, bs.h()), () => bs)
+    )
+
 object LazyList:
   def cons[A](hd: => A, tl: => LazyList[A]): LazyList[A] =
     lazy val head = hd
