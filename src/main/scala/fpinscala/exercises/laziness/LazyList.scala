@@ -1,5 +1,7 @@
 package fpinscala.exercises.laziness
 
+import fpinscala.exercises.laziness.LazyList.unfold
+
 enum LazyList[+A]:
   case Empty
   case Cons(h: () => A, t: () => LazyList[A])
@@ -105,6 +107,13 @@ enum LazyList[+A]:
         case (Cons(h1, t1), Cons(h2, t2)) =>
           Option(((Option(h1()), Option(h2())), (t1(), t2())))
     )
+
+  def tails: LazyList[LazyList[A]] = LazyList.unfold(this)(s =>
+    s match
+      case Empty      => Option.empty
+      case Cons(h, t) => Option(s, t())
+  )
+
 object LazyList:
   def cons[A](hd: => A, tl: => LazyList[A]): LazyList[A] =
     lazy val head = hd
