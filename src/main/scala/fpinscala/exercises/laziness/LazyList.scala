@@ -90,7 +90,10 @@ object LazyList:
       LazyList.cons(a, loop(b, a + b))
     loop(0, 1)
 
-  def unfold[A, S](state: S)(f: S => Option[(A, S)]): LazyList[A] = ???
+  def unfold[A, S](state: S)(f: S => Option[(A, S)]): LazyList[A] =
+    f(state).fold(LazyList.empty)((a, nextState) =>
+      LazyList.cons(a, unfold(nextState)(f))
+    )
 
   lazy val fibsViaUnfold: LazyList[Int] = ???
 
