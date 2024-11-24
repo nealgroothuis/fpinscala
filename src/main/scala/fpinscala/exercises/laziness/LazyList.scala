@@ -80,7 +80,8 @@ object LazyList:
 
   val ones: LazyList[Int] = LazyList.cons(1, ones)
 
-  def continually[A](a: A): LazyList[A] = ???
+  def continually[A](a: A): LazyList[A] =
+    LazyList.cons(a, LazyList.continually(a))
 
   def from(n: Int): LazyList[Int] = ???
 
