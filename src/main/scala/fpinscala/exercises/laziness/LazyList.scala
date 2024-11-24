@@ -66,6 +66,44 @@ enum LazyList[+A]:
 
   def startsWith[B](s: LazyList[B]): Boolean = ???
 
+  def mapViaUnfold[B](f: A => B): LazyList[B] = LazyList.unfold(this)(s =>
+    s match
+      case Empty      => Option.empty
+      case Cons(h, t) => Option((f(h()), t()))
+  )
+
+  def takeViaUnfold(n: Int): LazyList[A] = LazyList.unfold((this, n))(s =>
+    s match
+      case (Cons(h, t), i) if i > 0 => Option(h(), (t(), i - 1))
+      case _                        => Option.empty
+  )
+
+  def takeWhileViaUnfold(p: A => Boolean): LazyList[A] =
+    LazyList.unfold(this)(s =>
+      s match
+        case Cons(h, t) if p(h()) => Option((h(), t()))
+        case _                    => Option.empty
+    )
+
+  def zipWith[B, C](b: LazyList[B], f: (A, B) => C): LazyList[C] =
+    LazyList.unfold((this, b))(s =>
+      s match
+        case (Cons(h1, t1), Cons(h2, t2)) =>
+          Option((f(h1(), h2()), (t1(), t2())))
+        case _ => Option.empty
+    )
+
+  def zipAll[B](that: LazyList[B]): LazyList[(Option[A], Option[B])] =
+    LazyList.unfold((this, that))(s =>
+      s match
+        case (Empty, Empty) => Option.empty
+        case (Cons(h, t), Empty) =>
+          Option(((Option(h()), Option.empty), (t(), Empty)))
+        case (Empty, Cons(h, t)) =>
+          Option(((Option.empty, Option(h())), (Empty, t())))
+        case (Cons(h1, t1), Cons(h2, t2)) =>
+          Option(((Option(h1()), Option(h2())), (t1(), t2())))
+    )
 object LazyList:
   def cons[A](hd: => A, tl: => LazyList[A]): LazyList[A] =
     lazy val head = hd
