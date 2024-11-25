@@ -61,7 +61,14 @@ object RNG:
     val (d3, r3) = double(r2)
     ((d1, d2, d3), r3)
 
-  def ints(count: Int)(rng: RNG): (List[Int], RNG) = ???
+  def ints(count: Int)(rng: RNG): (List[Int], RNG) =
+    @annotation.tailrec
+    def loop(acc: List[Int], n: Int, rng: RNG): (List[Int], RNG) =
+      if n <= 0 then (acc, rng)
+      else
+        val (nextInt, nextRng) = rng.nextInt
+        loop(nextInt :: acc, n - 1, nextRng)
+    loop(List.empty, count, rng)
 
   def map2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] = ???
 
