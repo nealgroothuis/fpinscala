@@ -32,7 +32,11 @@ object RNG:
       val (a, rng2) = s(rng)
       (f(a), rng2)
 
-  def nonNegativeInt(rng: RNG): (Int, RNG) = ???
+  def nonNegativeInt(rng: RNG): (Int, RNG) =
+    val (randomNumber, newRNG) = rng.nextInt
+    if (randomNumber > 0) then (randomNumber, newRNG)
+    else if (randomNumber == Int.MinValue) then (0, newRNG)
+    else (-randomNumber, newRNG)
 
   def double(rng: RNG): (Double, RNG) = ???
 
