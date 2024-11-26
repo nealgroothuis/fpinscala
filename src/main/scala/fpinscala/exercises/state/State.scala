@@ -72,7 +72,14 @@ object RNG:
       (a :: as, nextRng)
     }
 
-  def flatMap[A, B](r: Rand[A])(f: A => Rand[B]): Rand[B] = ???
+  def flatMap[A, B](r: Rand[A])(f: A => Rand[B]): Rand[B] = rng =>
+    val (a, rng1) = r(rng)
+    f(a)(rng1)
+
+  def nonNegativeLessThan(n: Int): Rand[Int] = flatMap(nonNegativeInt)(i =>
+    val mod = i % n
+    if i + (n - 1) - mod >= 0 then unit(mod) else nonNegativeLessThan(n)
+  )
 
   def mapViaFlatMap[A, B](r: Rand[A])(f: A => B): Rand[B] = ???
 
