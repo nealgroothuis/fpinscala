@@ -38,12 +38,9 @@ object RNG:
     else if (randomNumber == Int.MinValue) then (0, newRNG)
     else (-randomNumber, newRNG)
 
-  def double(rng: RNG): (Double, RNG) =
-    val (nextInt, nextRng) = rng.nextInt
-    (
-      (nextInt.toDouble - Int.MinValue.toDouble) / (Int.MaxValue.toDouble - Int.MinValue.toDouble + 1.0),
-      nextRng
-    )
+  def double: Rand[Double] = map(int)(i =>
+    (i.toDouble - Int.MinValue.toDouble) / (Int.MaxValue.toDouble - Int.MinValue.toDouble + 1.0)
+  )
 
   def intDouble(rng: RNG): ((Int, Double), RNG) =
     val (i, r1) = rng.nextInt
