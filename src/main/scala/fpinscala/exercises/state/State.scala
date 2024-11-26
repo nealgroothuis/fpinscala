@@ -59,20 +59,18 @@ object RNG:
     ((d1, d2, d3), r3)
 
   def ints(count: Int)(rng: RNG): (List[Int], RNG) =
-    @annotation.tailrec
-    def loop(acc: List[Int], n: Int, rng: RNG): (List[Int], RNG) =
-      if n <= 0 then (acc, rng)
-      else
-        val (nextInt, nextRng) = rng.nextInt
-        loop(nextInt :: acc, n - 1, nextRng)
-    loop(List.empty, count, rng)
+    sequence(List.fill(count)(int))(rng)
 
   def map2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] = rng =>
     val (a, rng1) = ra(rng)
     val (b, rng2) = rb(rng1)
     (f(a, b), rng2)
 
-  def sequence[A](rs: List[Rand[A]]): Rand[List[A]] = ???
+  def sequence[A](rs: List[Rand[A]]): Rand[List[A]] = rng0 =>
+    rs.foldRight((List.empty[A], rng0)) { case (ra, (as, rng)) =>
+      val (a, nextRng) = ra(rng)
+      (a :: as, nextRng)
+    }
 
   def flatMap[A, B](r: Rand[A])(f: A => Rand[B]): Rand[B] = ???
 
