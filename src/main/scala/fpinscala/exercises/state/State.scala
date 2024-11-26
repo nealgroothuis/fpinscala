@@ -81,11 +81,12 @@ object RNG:
     if i + (n - 1) - mod >= 0 then unit(mod) else nonNegativeLessThan(n)
   )
 
-  def mapViaFlatMap[A, B](r: Rand[A])(f: A => B): Rand[B] = ???
+  def mapViaFlatMap[A, B](r: Rand[A])(f: A => B): Rand[B] =
+    flatMap(r)(a => unit(f(a)))
 
   def map2ViaFlatMap[A, B, C](ra: Rand[A], rb: Rand[B])(
       f: (A, B) => C
-  ): Rand[C] = ???
+  ): Rand[C] = flatMap(ra)(a => map(rb)(b => f(a, b)))
 
 opaque type State[S, +A] = S => (A, S)
 
