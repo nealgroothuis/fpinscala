@@ -111,6 +111,22 @@ object State:
 
   def apply[S, A](f: S => (A, S)): State[S, A] = f
 
+  def get[S]: State[S, S] = s => (s, s)
+
+  def set[S](s: S): State[S, Unit] = _ => ((), s)
+
+  def modify[S](f: S => S): State[S, Unit] =
+    for
+      s <- get
+      _ <- set(f(s))
+    yield ()
+
+  def sequence[S, A](sas: List[State[S, A]]): State[S, List[A]] = s0 =>
+    sas.foldLeft((List.empty[A], s0)) { case ((as, s), sa) =>
+      val (a, nextS) = sa(s)
+      (as :+ a, nextS)
+    }
+
 enum Input:
   case Coin, Turn
 
@@ -118,16 +134,19 @@ case class Machine(locked: Boolean, candies: Int, coins: Int)
 
 object Candy:
   def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] =
-    State((s0: Machine) =>
-      val endState = inputs.foldLeft(s0)((s, input) =>
-        if s.candies > 0 then
-          input match
-            case Input.Coin if s.locked =>
-              Machine(locked = false, candies = s.candies, coins = s.coins + 1)
-            case Input.Turn if !s.locked =>
-              Machine(locked = true, candies = s.candies - 1, coins = s.coins)
-            case _ => s
-        else s
+    for
+      _ <- State.sequence(
+        inputs.map(input => State.modify(modifyFnForInput(input)))
       )
-      ((endState.coins, endState.candies), endState)
-    )
+      finalState <- State.get
+    yield (finalState.coins, finalState.candies)
+
+  def modifyFnForInput(input: Input): Machine => Machine = (s: Machine) =>
+    if s.candies > 0 then
+      input match
+        case Input.Coin if s.locked =>
+          Machine(locked = false, candies = s.candies, coins = s.coins + 1)
+        case Input.Turn if !s.locked =>
+          Machine(locked = true, candies = s.candies - 1, coins = s.coins)
+        case _ => s
+    else s
