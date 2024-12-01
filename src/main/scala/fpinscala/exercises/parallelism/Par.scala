@@ -61,14 +61,20 @@ object Par:
     ).map(_.flatten)
 
   def choice[A](cond: Par[Boolean])(t: Par[A], f: Par[A]): Par[A] =
-    cond.chooser(if _ then t else f)
+    cond.flatMap(if _ then t else f)
 
   def choiceN[A](n: Par[Int])(choices: List[Par[A]]): Par[A] =
-    n.chooser(choices.apply)
+    n.flatMap(choices.apply)
 
   def choiceMap[K, V](key: Par[K])(choices: Map[K, Par[V]]): Par[V] =
-    key.chooser(choices.apply)
+    key.flatMap(choices.apply)
 
   extension [A](pa: Par[A])
-    def chooser[B](choices: A => Par[B]): Par[B] = es =>
-      choices(pa.run(es).get).run(es)
+    def flatMap[B](f: A => Par[B]): Par[B] = es => f(pa.run(es).get).run(es)
+
+  def join[A](ppa: Par[Par[A]]): Par[A] = es => ppa.run(es).get().run(es)
+
+  def joinViaFlatMap[A](ppa: Par[Par[A]]): Par[A] = ppa.flatMap(identity)
+
+  def flatMapViaJoin[A, B](pa: Par[A])(f: A => Par[B]): Par[B] =
+    join(pa.map(f))
