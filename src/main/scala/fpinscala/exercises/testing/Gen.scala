@@ -2,7 +2,7 @@ package fpinscala.exercises.testing
 
 import fpinscala.exercises.state.*
 import fpinscala.exercises.parallelism.*
-import fpinscala.exercises.parallelism.Par.Par
+import fpinscala.exercises.parallelism.Par
 import Gen.*
 import Prop.*
 import java.util.concurrent.{Executors,ExecutorService}

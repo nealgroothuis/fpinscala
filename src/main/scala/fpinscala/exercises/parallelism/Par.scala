@@ -54,3 +54,8 @@ object Par:
     fork:
       val fbs: List[Par[B]] = ps.map(asyncF(f))
       sequence(fbs)
+
+  def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] =
+    sequence(
+      as.map(a => if (f(a)) then unit(List(a)) else unit(List.empty))
+    ).map(_.flatten)
