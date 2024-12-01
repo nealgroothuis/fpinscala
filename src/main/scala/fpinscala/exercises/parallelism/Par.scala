@@ -49,3 +49,8 @@ object Par:
 
   def sequence[A](ps: List[Par[A]]): Par[List[A]] =
     ps.foldRight(unit(List.empty[A]))((pa, pas) => pa.map2(pas)(_ :: _))
+
+  def parMap[A, B](ps: List[A])(f: A => B): Par[List[B]] =
+    fork:
+      val fbs: List[Par[B]] = ps.map(asyncF(f))
+      sequence(fbs)
