@@ -65,3 +65,6 @@ object Par:
 
   def choiceN[A](n: Par[Int])(choices: List[Par[A]]): Par[A] = es =>
     choices(n.run(es).get).run(es)
+
+  def choiceMap[K, V](key: Par[K])(choices: Map[K, Par[V]]): Par[V] = es =>
+    choices(key.run(es).get).run(es)
