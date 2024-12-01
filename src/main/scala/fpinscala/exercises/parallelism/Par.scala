@@ -46,3 +46,6 @@ object Par:
 
   def sortPar(parList: Par[List[Int]]) =
     parList.map(_.sorted)
+
+  def sequence[A](ps: List[Par[A]]): Par[List[A]] =
+    ps.foldRight(unit(List.empty[A]))((pa, pas) => pa.map2(pas)(_ :: _))
