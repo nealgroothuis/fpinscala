@@ -59,3 +59,9 @@ object Par:
     sequence(
       as.map(a => if (f(a)) then unit(List(a)) else unit(List.empty))
     ).map(_.flatten)
+
+  def choice[A](cond: Par[Boolean])(t: Par[A], f: Par[A]): Par[A] =
+    choiceN(cond.map(if _ then 0 else 1))(List(t, f))
+
+  def choiceN[A](n: Par[Int])(choices: List[Par[A]]): Par[A] = es =>
+    choices(n.run(es).get).run(es)
