@@ -12,6 +12,13 @@ import java.util.concurrent.{Executors, ExecutorService}
   * a is a*n.
   */
 
+/* Exercise 8.2: Properties of max(List[Int])
+ * - Max of an empty list is undefined
+ * - Max of a single-element list is the element
+ * - Max of a two-item list [a, b] is the greater of a and b
+ * - Max of any list of two or more items is the max of the maxes of any partitioning of the list into non-empty sub-lists
+ */
+
 /*
 The library developed in this chapter goes through several iterations. This file is just the
 shell, which you can fill in and modify while working through the chapter.
