@@ -7,6 +7,11 @@ import Gen.*
 import Prop.*
 import java.util.concurrent.{Executors, ExecutorService}
 
+/** Exercise 8.1. Sum of a reversed (or generally, permuted) list is the same as
+  * the original Sum of a zero-length list is 0. Sum of a list of n elements of
+  * a is a*n.
+  */
+
 /*
 The library developed in this chapter goes through several iterations. This file is just the
 shell, which you can fill in and modify while working through the chapter.
