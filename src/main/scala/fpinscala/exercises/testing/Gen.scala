@@ -45,7 +45,9 @@ object Gen:
   def boolean: Gen[Boolean] = State(RNG.map(RNG.nonNegativeInt(_))(_ % 2 == 0))
   extension [A](self: Gen[A])
     def listOfN(n: Int): Gen[List[A]] = State.sequence(List.fill(n)(self))
-
-  extension [A](self: Gen[A]) def flatMap[B](f: A => Gen[B]): Gen[B] = ???
+  extension [A](self: Gen[A])
+    def flatMap[B](f: A => Gen[B]): Gen[B] = State.flatMap(self)(f)
+  extension [A](self: Gen[A])
+    def listOfN(size: Gen[Int]): Gen[List[A]] = size.flatMap(listOfN)
 
 trait SGen[+A]
