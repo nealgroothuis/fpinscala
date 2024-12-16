@@ -29,7 +29,7 @@ trait Prop:
   def check: Either[(FailedCase, SuccessCount), SuccessCount] = ???
   def &&(that: Prop): Prop =
     new Prop:
-      override def check: Boolean = ???
+      override def check: Either[(FailedCase, SuccessCount), SuccessCount] = ???
 
 object Prop:
   opaque type FailedCase = String
@@ -41,7 +41,10 @@ object Gen:
   def choose(start: Int, stopExclusive: Int): Gen[Int] =
     State(RNG.map(RNG.nonNegativeLessThan(stopExclusive - start))(_ + start))
 
-  def unit[A](a: => A): Gen[A] = ???
+  def unit[A](a: => A): Gen[A] = State(RNG.unit(a))
+  def boolean: Gen[Boolean] = State(RNG.map(RNG.nonNegativeInt(_))(_ % 2 == 0))
+  extension [A](self: Gen[A])
+    def listOfN(n: Int): Gen[List[A]] = State.sequence(List.fill(n)(self))
 
   extension [A](self: Gen[A]) def flatMap[B](f: A => Gen[B]): Gen[B] = ???
 
