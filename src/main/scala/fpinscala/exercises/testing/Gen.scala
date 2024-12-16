@@ -26,21 +26,23 @@ shell, which you can fill in and modify while working through the chapter.
 
 trait Prop:
   self =>
-  def check: Boolean = ???
+  def check: Either[(FailedCase, SuccessCount), SuccessCount] = ???
   def &&(that: Prop): Prop =
     new Prop:
-      override def check: Boolean = self.check && that.check
+      override def check: Boolean = ???
 
 object Prop:
+  opaque type FailedCase = String
+  opaque type SuccessCount = Int
   def forAll[A](gen: Gen[A])(f: A => Boolean): Prop = ???
 
+opaque type Gen[+A] = State[RNG, A]
 object Gen:
+  def choose(start: Int, stopExclusive: Int): Gen[Int] =
+    State(RNG.map(RNG.nonNegativeLessThan(stopExclusive - start))(_ + start))
+
   def unit[A](a: => A): Gen[A] = ???
 
   extension [A](self: Gen[A]) def flatMap[B](f: A => Gen[B]): Gen[B] = ???
-
-trait Gen[A]:
-  def map[B](f: A => B): Gen[B] = ???
-  def flatMap[B](f: A => Gen[B]): Gen[B] = ???
 
 trait SGen[+A]
