@@ -66,6 +66,30 @@ object Prop:
       s"generated an exception: ${e.getMessage}\n" +
       s"stack trace:\n ${e.getStackTrace.mkString("\n")}"
 
+  extension (self: Prop)
+    def &&(that: Prop): Prop = (testCases, rng) =>
+      self(testCases, rng) match
+        case Result.Falsified(failure, successes) =>
+          Result.Falsified("left: " + failure, successes)
+        case Result.Passed =>
+          that(testCases, rng) match
+            case Result.Passed => Result.Passed
+            case Result.Falsified(failure, successes) =>
+              Result.Falsified("right: " + failure, successes)
+
+  extension (self: Prop)
+    def ||(that: Prop): Prop = (testCases, rng) =>
+      self(testCases, rng) match
+        case Result.Passed => Result.Passed
+        case Result.Falsified(leftFailure, _) =>
+          that(testCases, rng) match
+            case Result.Passed => Result.Passed
+            case Result.Falsified(rightFailure, rightSuccesses) =>
+              Result.Falsified(
+                s"left: ${leftFailure} right: ${rightFailure}",
+                rightSuccesses
+              )
+
 opaque type Gen[+A] = State[RNG, A]
 object Gen:
   def choose(start: Int, stopExclusive: Int): Gen[Int] =
