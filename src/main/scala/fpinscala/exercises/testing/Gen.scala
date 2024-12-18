@@ -50,4 +50,7 @@ object Gen:
   extension [A](self: Gen[A])
     def listOfN(size: Gen[Int]): Gen[List[A]] = size.flatMap(listOfN)
 
+  def union[A](g1: Gen[A], g2: Gen[A]): Gen[A] =
+    Gen.boolean.flatMap(which => if which then g1 else g2)
+
 trait SGen[+A]
