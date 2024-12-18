@@ -24,17 +24,47 @@ The library developed in this chapter goes through several iterations. This file
 shell, which you can fill in and modify while working through the chapter.
  */
 
-trait Prop:
-  self =>
-  def check: Either[(FailedCase, SuccessCount), SuccessCount] = ???
-  def &&(that: Prop): Prop =
-    new Prop:
-      override def check: Either[(FailedCase, SuccessCount), SuccessCount] = ???
+opaque type TestCases = Int
+object TestCases:
+  extension (x: TestCases) def toInt: Int = x
+
+  def fromInt(x: Int): TestCases = x
+
+enum Result:
+  case Passed
+  case Falsified(failure: FailedCase, successes: SuccessCount)
+  def isFalsified: Boolean = this match
+    case Passed          => false
+    case Falsified(_, _) => true
+
+opaque type Prop = (TestCases, RNG) => Result
 
 object Prop:
   opaque type FailedCase = String
   opaque type SuccessCount = Int
-  def forAll[A](gen: Gen[A])(f: A => Boolean): Prop = ???
+
+  def forAll[A](as: Gen[A])(f: A => Boolean): Prop = (n, rng) =>
+    randomLazyList(as)(rng)
+      .zip(LazyList.from(0))
+      .take(n)
+      .map:
+        case (a, i) =>
+          try
+            if f(a) then Result.Passed
+            else Result.Falsified(a.toString, i)
+          catch
+            case e: Exception =>
+              Result.Falsified(buildMsg(a, e), i)
+      .find(_.isFalsified)
+      .getOrElse(Result.Passed)
+
+  def randomLazyList[A](g: Gen[A])(rng: RNG): LazyList[A] =
+    LazyList.unfold(rng)(rng => Some(g.run(rng)))
+
+  def buildMsg[A](s: A, e: Exception): String =
+    s"test case: $s\n" +
+      s"generated an exception: ${e.getMessage}\n" +
+      s"stack trace:\n ${e.getStackTrace.mkString("\n")}"
 
 opaque type Gen[+A] = State[RNG, A]
 object Gen:
